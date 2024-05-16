@@ -17,16 +17,13 @@ pipeline {
         stage('Checkout code') {
             steps {
                 git url: 'https://github.com/ArwaHazem/infrastructure-pipeline-terraform-jenkins.git', branch: 'main'
-
             }
         }
 
         stage('Initialize Terraform') {
             steps {
                 dir('terraform') {
-                    script {
-                        sh 'terraform init -input=false'
-                    }
+                    sh 'terraform init -input=false'
                 }
             }
         }
@@ -34,9 +31,7 @@ pipeline {
         stage('Select Workspace') {
             steps {
                 dir('terraform') {
-                    script {
-                        sh "terraform workspace select ${params.ENVIRONMENT} || terraform workspace new ${params.ENVIRONMENT}"
-                    }
+                    sh "terraform workspace select ${params.ENVIRONMENT} || terraform workspace new ${params.ENVIRONMENT}"
                 }
             }
         }
@@ -44,13 +39,12 @@ pipeline {
         stage('Provide Terraform Variables File') {
             steps {
                 script {
-                    def tfvarsFile = ''
                     if (params.ENVIRONMENT == 'dev') {
-                        tfvarsFile = configFile(fileId: 'dev-tfvars', variable: 'TFVARS_FILE')
+                        configFile(fileId: 'dev-tfvars', variable: 'TFVARS_FILE')
                     } else if (params.ENVIRONMENT == 'prod') {
-                        tfvarsFile = configFile(fileId: 'prod-tfvars', variable: 'TFVARS_FILE')
+                        configFile(fileId: 'prod-tfvars', variable: 'TFVARS_FILE')
                     }
-                    env.TFVARS_FILE = tfvarsFile
+                    echo "Using TFVARS_FILE: ${env.TFVARS_FILE}"
                 }
             }
         }
@@ -59,10 +53,11 @@ pipeline {
             steps {
                 dir('terraform') {
                     script {
+                        echo "Executing Terraform ${params.COMMAND} with variables from ${env.TFVARS_FILE}"
                         if (params.COMMAND == 'apply') {
-                            sh "terraform apply -auto-approve -var-file=${TFVARS_FILE}"
+                            sh "terraform apply -auto-approve -var-file=${env.TFVARS_FILE}"
                         } else if (params.COMMAND == 'destroy') {
-                            sh "terraform destroy -auto-approve -var-file=${TFVARS_FILE}"
+                            sh "terraform destroy -auto-approve -var-file=${env.TFVARS_FILE}"
                         }
                     }
                 }
