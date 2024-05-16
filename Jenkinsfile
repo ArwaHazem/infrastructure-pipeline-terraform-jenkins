@@ -16,7 +16,8 @@ pipeline {
     stages {
         stage('Checkout code') {
             steps {
-                git 'https://github.com/ArwaHazem/infrastructure-pipeline-terraform-jenkins.git', branch: 'main
+                git url: 'https://github.com/ArwaHazem/infrastructure-pipeline-terraform-jenkins.git', branch: 'main'
+
             }
         }
 
