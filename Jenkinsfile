@@ -39,12 +39,13 @@ pipeline {
         stage('Provide Terraform Variables File') {
             steps {
                 script {
-                    if (params.ENVIRONMENT == 'dev') {
-                        configFile(fileId: 'dev-tfvars', variable: 'TFVARS_FILE')
-                    } else if (params.ENVIRONMENT == 'prod') {
-                        configFile(fileId: 'prod-tfvars', variable: 'TFVARS_FILE')
+                    def tfvarsFileId = "${params.ENVIRONMENT}-tfvars"
+                    configFileProvider([configFile(fileId: tfvarsFileId, variable: 'TFVARS_FILE')]) {
+                        script {
+                            sh "cp ${TFVARS_FILE} terraform/${params.ENVIRONMENT}.tfvars"
+                            env.TFVARS_FILE = "${params.ENVIRONMENT}.tfvars"
+                        }
                     }
-                    echo "Using TFVARS_FILE: ${env.TFVARS_FILE}"
                 }
             }
         }
