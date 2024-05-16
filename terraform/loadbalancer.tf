@@ -8,8 +8,6 @@ resource "aws_lb" "alb" {
   tags = {
     Name = "nodejs-alb"
   }
-
-  enable_deletion_protection = false
 }
 
 resource "aws_lb_target_group" "alb_tg" {
