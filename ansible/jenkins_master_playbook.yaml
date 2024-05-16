@@ -1,0 +1,39 @@
+---
+- name: Configure EC2 instance in aws as jenkins master
+  hosts: jenkins_master
+  remote_user: ubuntu
+  become: yes
+
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install openjdk-17-jdk as prerequisite for jenkins
+      apt:
+        name: openjdk-17-jdk
+        state: present
+
+    - name: Download the Jenkins GPG key
+      get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+
+    - name: Add the Jenkins repository
+      apt_repository:
+        repo: 'deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/'
+        filename: 'jenkins'
+
+        
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Start Jenkins service
+      service:
+        name: jenkins
+        state: started
+        enabled: yes

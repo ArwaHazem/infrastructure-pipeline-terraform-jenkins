@@ -1,0 +1,10 @@
+Host bastion-host
+  HostName 3.224.127.0
+  IdentityFile /path/to/privatekey
+  User ubuntu 
+
+Host private-host
+  HostName 10.0.2.93
+  IdentityFile /path/to/privatekey
+  User ubuntu 
+  ProxyJump bastion-host

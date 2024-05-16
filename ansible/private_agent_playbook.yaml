@@ -1,0 +1,57 @@
+---
+- name: Configure EC2 instance as jenkins private agent to run mainly pipeline with docker
+  hosts: private-host
+  become: yes
+  tasks:
+    - name: Update system
+      apt:
+        update_cache: yes
+
+    - name: Install lsb-release
+      apt:
+        name: lsb-release
+        state: present
+
+    - name: Get Ubuntu distribution codename
+      command: lsb_release -cs
+      register: ubuntu_codename
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      
+    - name: Set up Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ubuntu_codename.stdout }} stable"
+        state: present
+
+    - name: Install Docker Engine
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Add ubuntu user to the docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Install OpenJDK 17
+      apt:
+        name: openjdk-17-jdk
+        state: present
+
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+
+    - name: Create Jenkins directory in home
+      file:
+        path: "/home/ubuntu/jenkins"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0777'

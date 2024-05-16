@@ -1,0 +1,8 @@
+private-host
+
+[jenkins_master]
+35.175.197.195
+
+
+[jenkins_public_agent]
+34.229.169.143

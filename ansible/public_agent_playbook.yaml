@@ -1,0 +1,51 @@
+---
+- name: Configure EC2 instance in aws as jenkins agent to mainly run terraform pipeline
+  hosts: jenkins_public_agent
+  remote_user: ubuntu
+  become: yes
+
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - git
+        - openjdk-17-jdk
+        - gnupg
+        - software-properties-common
+         
+
+    - name: Add HashiCorp GPG key
+      apt_key:
+        url: https://apt.releases.hashicorp.com/gpg
+        state: present
+
+    - name: Add HashiCorp repository
+      apt_repository:
+        repo: deb https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main
+        state: present
+        filename: 'hashicorp'
+
+    - name: Update apt cache after adding repository
+      apt:
+        update_cache: yes
+
+    - name: Install Terraform
+      apt:
+        name: terraform
+        state: present
+
+    - name: Create jenkins directory in home
+      file:
+        path: /home/ubuntu/jenkins
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0777'
